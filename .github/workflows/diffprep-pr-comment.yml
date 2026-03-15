@@ -29,7 +29,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          uvx diffprep init
+          uv tool install diffprep
+          diffprep init
           git config --local include.path ../.gitconfig.repo
 
       - name: Build diffprep report
