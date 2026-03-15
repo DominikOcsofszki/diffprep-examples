@@ -25,7 +25,7 @@ jobs:
       - name: Add uv to PATH
         run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
-      - name: Initialize diffprep git integration
+      - name: Install and initialize diffprep
         shell: bash
         run: |
           set -euo pipefail
@@ -88,7 +88,7 @@ jobs:
 
             const existing = comments.find(comment =>
               comment.user.type === "Bot" &&
-              comment.body &&
+              typeof comment.body === "string" &&
               comment.body.includes(marker)
             );
 
