@@ -1,15 +1,15 @@
 {
 	"version": "1.0",
 	"timestamp": "2026-03-08T12:00:00Z",
-	"generatedAt": "2026-03-08T12:00:00Z",
-	"updatedAt": "2026-03-08T12:01:00Z",
 	"name": "example",
 	"data": {
+		"timestamp": "2026-03-08T11:59:00Z",
 		"id": 123,
 		"version": 2,
-		"timestamp": "2026-03-08T11:59:00Z",
 		"value": "keep-me"
 	},
+	"generatedAt": "2026-03-08T12:00:00Z",
+	"updatedAt": "2026-03-08T12:01:00Z",
 	"items": [
 		{
 			"id": 1,
