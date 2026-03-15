@@ -1,5 +1,4 @@
 {
-	"version": "1.0",
 	"timestamp": "2026-03-08T12:00:00Z",
 	"data": {
 		"id": 123,
@@ -8,8 +7,8 @@
 	"timestamp2": "2026-03-08T12:00:00Z",
 	"items": [
 		{
-			"id": 1,
 			"generatedAt": "2026-03-08T11:58:00Z",
+			"id": 1,
 			"value": "a"
 		},
 		{
