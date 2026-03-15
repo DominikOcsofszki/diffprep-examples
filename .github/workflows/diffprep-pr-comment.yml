@@ -1,0 +1,108 @@
+name: diffprep PR comment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  diffprep:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+      - name: Add uv to PATH
+        run: echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Initialize diffprep git integration
+        shell: bash
+        run: |
+          set -euo pipefail
+          uvx diffprep init
+          git config --local include.path ../.gitconfig.repo
+
+      - name: Build diffprep report
+        id: report
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          REPORT="diffprep_report.md"
+          RAW_DIFF="diffprep.diff"
+
+          git diff "$BASE_SHA" "$HEAD_SHA" > "$RAW_DIFF" || true
+
+          {
+            echo "## diffprep report"
+            echo
+
+            if [[ ! -s "$RAW_DIFF" ]]; then
+              echo "No diff detected."
+            else
+              echo "Diff generated with \`diffprep init\` git configuration."
+              echo
+              echo '```diff'
+              head -n 600 "$RAW_DIFF"
+              echo '```'
+
+              TOTAL_LINES="$(wc -l < "$RAW_DIFF" | tr -d ' ')"
+              if [[ "$TOTAL_LINES" -gt 600 ]]; then
+                echo
+                echo "_Output truncated at 600 lines._"
+              fi
+            fi
+          } > "$REPORT"
+
+          echo "report_path=$REPORT" >> "$GITHUB_OUTPUT"
+
+      - name: Create or update PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require("fs");
+            const marker = "<!-- diffprep-comment -->";
+            const body = fs.readFileSync("${{ steps.report.outputs.report_path }}", "utf8");
+            const finalBody = `${marker}\n${body}`;
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number, per_page: 100 }
+            );
+
+            const existing = comments.find(comment =>
+              comment.user.type === "Bot" &&
+              comment.body &&
+              comment.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body: finalBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number,
+                body: finalBody,
+              });
+            }
