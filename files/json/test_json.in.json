@@ -4,8 +4,7 @@
 	"data": {
 		"timestamp": "2026-03-08T11:59:00Z",
 		"id": 123,
-		"version": 2,
-		"value": "keep-me"
+		"version": 2
 	},
 	"generatedAt": "2026-03-08T12:00:00Z",
 	"updatedAt": "2026-03-08T12:01:00Z",
